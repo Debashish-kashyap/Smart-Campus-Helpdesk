@@ -43,19 +43,45 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   }, [isOpen, currentInstruction]);
 
-  if (!isOpen) return null;
+  const verifyPin = async (pin: string): Promise<boolean> => {
+  try {
+    const res = await fetch(
+      "https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/admin-auth",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pin }),
+      }
+    );
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const correctPin = process.env.ADMIN_PIN;
+    return res.ok;
+  } catch {
+    return false;
+  }
+};
 
-    if (correctPin && password === correctPin) {
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const success = await verifyPin(password);
+
+    if (success) {
       setIsAuthenticated(true);
-      setPassword('');
+      setPassword("");
     } else {
-      alert('Incorrect PIN');
+      alert("Incorrect PIN");
     }
-  };
+  } catch {
+    alert("Server error");
+  }
+};
+
+if (!isOpen) return null;
+
+
 
   // --- Notices ---
   const handleAddNotice = () => {
