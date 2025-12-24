@@ -33,8 +33,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple PIN for demonstration
-    if (password === '1234') {
+    const correctPin = process.env.ADMIN_PIN;
+
+    if (correctPin && password === correctPin) {
       setIsAuthenticated(true);
       setPassword('');
     } else {
@@ -81,7 +82,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </svg>
                 </div>
                 <h3 className="font-semibold text-slate-900">Admin Access Required</h3>
-                <p className="text-sm text-slate-500">Enter PIN "1234" to continue</p>
+                <p className="text-sm text-slate-500">Enter Admin PIN to continue</p>
               </div>
               <input
                 type="password"
