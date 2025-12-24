@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import QuickActions from './components/QuickActions';
 import NoticeBanner from './components/NoticeBanner';
 import AdminPanel from './components/AdminPanel';
-import { Message, Role } from './types';
+import { Message, Role, CampusDocument } from './types';
 import { geminiService } from './services/geminiService';
 import { SYSTEM_INSTRUCTION } from './constants';
 
@@ -22,29 +22,64 @@ const App: React.FC = () => {
   
   // Admin State
   const [notices, setNotices] = useState<string[]>([]);
+  const [documents, setDocuments] = useState<CampusDocument[]>([]);
   const [customInstruction, setCustomInstruction] = useState(SYSTEM_INSTRUCTION);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Initialize System Instruction (combining Base + Notices + Documents)
+  const updateAiContext = useCallback((baseInstruction: string, activeNotices: string[], activeDocs: CampusDocument[]) => {
+    let combinedInstruction = baseInstruction;
+
+    // Append Notices
+    if (activeNotices.length > 0) {
+      combinedInstruction += `\n\n### CURRENT IMPORTANT NOTICES:\n${activeNotices.map(n => `- ${n}`).join('\n')}`;
+    }
+
+    // Append Documents (Indexing)
+    if (activeDocs.length > 0) {
+      combinedInstruction += `\n\n### INDEXED CAMPUS DOCUMENTS (CIRCULARS & PDFs):\nUse the following information to answer user queries accurately:\n\n`;
+      activeDocs.forEach(doc => {
+        combinedInstruction += `--- START OF DOCUMENT: ${doc.name} ---\n${doc.content}\n--- END OF DOCUMENT ---\n\n`;
+      });
+    }
+
+    geminiService.setSystemInstruction(combinedInstruction);
+  }, []);
+
   // Load admin settings from localStorage on mount
   useEffect(() => {
     const savedNotices = localStorage.getItem('adtu_notices');
     const savedInstruction = localStorage.getItem('adtu_instruction');
+    const savedDocuments = localStorage.getItem('adtu_documents');
+
+    let loadedNotices: string[] = [];
+    let loadedInstruction = SYSTEM_INSTRUCTION;
+    let loadedDocuments: CampusDocument[] = [];
 
     if (savedNotices) {
       try {
-        setNotices(JSON.parse(savedNotices));
-      } catch (e) {
-        console.error("Failed to parse notices", e);
-      }
+        loadedNotices = JSON.parse(savedNotices);
+        setNotices(loadedNotices);
+      } catch (e) { console.error("Failed to parse notices", e); }
     }
 
     if (savedInstruction) {
-      setCustomInstruction(savedInstruction);
-      geminiService.setSystemInstruction(savedInstruction);
+      loadedInstruction = savedInstruction;
+      setCustomInstruction(loadedInstruction);
     }
-  }, []);
+
+    if (savedDocuments) {
+      try {
+        loadedDocuments = JSON.parse(savedDocuments);
+        setDocuments(loadedDocuments);
+      } catch (e) { console.error("Failed to parse documents", e); }
+    }
+
+    // Set initial context
+    updateAiContext(loadedInstruction, loadedNotices, loadedDocuments);
+  }, [updateAiContext]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,12 +92,19 @@ const App: React.FC = () => {
   const handleUpdateInstruction = (newInstruction: string) => {
     setCustomInstruction(newInstruction);
     localStorage.setItem('adtu_instruction', newInstruction);
-    geminiService.setSystemInstruction(newInstruction);
+    updateAiContext(newInstruction, notices, documents);
   };
 
   const handleUpdateNotices = (newNotices: string[]) => {
     setNotices(newNotices);
     localStorage.setItem('adtu_notices', JSON.stringify(newNotices));
+    updateAiContext(customInstruction, newNotices, documents);
+  };
+
+  const handleUpdateDocuments = (newDocuments: CampusDocument[]) => {
+    setDocuments(newDocuments);
+    localStorage.setItem('adtu_documents', JSON.stringify(newDocuments));
+    updateAiContext(customInstruction, notices, newDocuments);
   };
 
   const handleSendMessage = async (text: string) => {
@@ -129,7 +171,7 @@ const App: React.FC = () => {
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: Role.MODEL,
-        text: "I apologize, but I encountered an error connecting to the campus network.",
+        text: "I apologize, but I encountered an error connecting to the campus server right now. Please try again later.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -221,6 +263,8 @@ const App: React.FC = () => {
         onUpdateInstruction={handleUpdateInstruction}
         notices={notices}
         onUpdateNotices={handleUpdateNotices}
+        documents={documents}
+        onUpdateDocuments={handleUpdateDocuments}
       />
     </div>
   );
