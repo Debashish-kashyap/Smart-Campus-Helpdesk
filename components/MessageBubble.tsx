@@ -13,7 +13,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
   return (
     <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
-      <div className={`flex max-w-[95%] md:max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'} gap-3`}>
+      <div className={`flex max-w-[95%] sm:max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'} gap-2 md:gap-3`}>
         
         {/* Avatar */}
         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isUser ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'}`}>
@@ -32,7 +32,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         {/* Bubble */}
         <div className={`flex flex-col min-w-0`}>
           <div
-            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
+            className={`px-3 py-2 md:px-4 md:py-3 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap break-words ${
               isUser
                 ? 'bg-blue-600 text-white rounded-tr-none'
                 : 'bg-white text-slate-700 border border-slate-200 rounded-tl-none'

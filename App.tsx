@@ -189,16 +189,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
+    <div className="flex flex-col h-[100dvh] bg-slate-50 overflow-hidden w-full">
       <Header onAdminClick={() => setShowAdmin(true)} />
       
       <NoticeBanner notices={notices} />
 
       {/* Main Chat Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-6 scroll-smooth w-full">
         <div className="max-w-4xl mx-auto flex flex-col min-h-full">
           {/* Messages */}
-          <div className="flex-1">
+          <div className="flex-1 pb-2">
             {messages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
@@ -208,23 +208,23 @@ const App: React.FC = () => {
       </main>
 
       {/* Input Area */}
-      <div className="bg-white border-t border-slate-200 p-4 z-10">
-        <div className="max-w-4xl mx-auto">
+      <div className="bg-white border-t border-slate-200 p-3 md:p-4 z-10 w-full flex-shrink-0 safe-area-bottom">
+        <div className="max-w-4xl mx-auto w-full">
           
           <div className="mb-3">
              <QuickActions onQuestionSelect={(text) => handleSendMessage(text)} disabled={isLoading} />
           </div>
 
-          <form onSubmit={handleFormSubmit} className="relative flex items-center gap-2">
+          <form onSubmit={handleFormSubmit} className="relative flex items-center gap-2 w-full">
             <div className="relative flex-1">
               <input
                 ref={inputRef}
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about admissions, hostels, or courses..."
+                placeholder="Ask about admissions, hostels..."
                 disabled={isLoading}
-                className="w-full pl-5 pr-12 py-3.5 bg-slate-100 border-none rounded-2xl text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white transition-all shadow-inner"
+                className="w-full pl-4 pr-12 py-3 bg-slate-100 border-none rounded-2xl text-base text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white transition-all shadow-inner"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2">
                 <button
@@ -247,9 +247,9 @@ const App: React.FC = () => {
               </div>
             </div>
           </form>
-          <div className="text-center mt-2">
+          <div className="text-center mt-2 hidden xs:block">
             <p className="text-[10px] text-slate-400">
-              AI generated responses. Check the official AdtU website for critical updates.
+              AI generated responses. Check official AdtU website for updates.
             </p>
           </div>
         </div>

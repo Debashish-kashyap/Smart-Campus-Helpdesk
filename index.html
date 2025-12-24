@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Smart Campus Helpdesk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,10 +12,10 @@
       }
       /* Custom scrollbar for webkit */
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #f1f1f1; 
+        background: transparent; 
       }
       ::-webkit-scrollbar-thumb {
         background: #cbd5e1; 
@@ -23,6 +23,15 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #94a3b8; 
+      }
+      
+      /* Utilities for hiding scrollbar but allowing scroll */
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+      }
+      .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
       }
     </style>
   <script type="importmap">
@@ -37,7 +46,7 @@
 }
 </script>
 </head>
-  <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden">
-    <div id="root" class="h-full"></div>
+  <body class="bg-slate-50 text-slate-900 h-[100dvh] w-full overflow-hidden overscroll-none">
+    <div id="root" class="h-full w-full"></div>
   </body>
 </html>
