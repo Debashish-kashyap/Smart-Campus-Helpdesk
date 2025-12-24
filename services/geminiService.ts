@@ -10,9 +10,15 @@ interface StreamChunk {
 class GeminiService {
   private ai: GoogleGenAI;
   private chatSession: Chat | null = null;
+  private currentSystemInstruction: string = SYSTEM_INSTRUCTION;
 
   constructor() {
     this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+
+  public setSystemInstruction(instruction: string) {
+    this.currentSystemInstruction = instruction;
+    this.resetChat();
   }
 
   public getChatSession(): Chat {
@@ -20,7 +26,7 @@ class GeminiService {
       this.chatSession = this.ai.chats.create({
         model: 'gemini-3-flash-preview',
         config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
+          systemInstruction: this.currentSystemInstruction,
           temperature: 0.7,
           tools: [{ googleSearch: {} }], // Enable Search Grounding
           thinkingConfig: { thinkingBudget: 0 }, // Disable thinking for lowest latency

@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import Header from './components/Header';
 import MessageBubble from './components/MessageBubble';
 import QuickActions from './components/QuickActions';
+import NoticeBanner from './components/NoticeBanner';
+import AdminPanel from './components/AdminPanel';
 import { Message, Role } from './types';
 import { geminiService } from './services/geminiService';
+import { SYSTEM_INSTRUCTION } from './constants';
 
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -15,8 +18,33 @@ const App: React.FC = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  
+  // Admin State
+  const [notices, setNotices] = useState<string[]>([]);
+  const [customInstruction, setCustomInstruction] = useState(SYSTEM_INSTRUCTION);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load admin settings from localStorage on mount
+  useEffect(() => {
+    const savedNotices = localStorage.getItem('adtu_notices');
+    const savedInstruction = localStorage.getItem('adtu_instruction');
+
+    if (savedNotices) {
+      try {
+        setNotices(JSON.parse(savedNotices));
+      } catch (e) {
+        console.error("Failed to parse notices", e);
+      }
+    }
+
+    if (savedInstruction) {
+      setCustomInstruction(savedInstruction);
+      geminiService.setSystemInstruction(savedInstruction);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,6 +53,17 @@ const App: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleUpdateInstruction = (newInstruction: string) => {
+    setCustomInstruction(newInstruction);
+    localStorage.setItem('adtu_instruction', newInstruction);
+    geminiService.setSystemInstruction(newInstruction);
+  };
+
+  const handleUpdateNotices = (newNotices: string[]) => {
+    setNotices(newNotices);
+    localStorage.setItem('adtu_notices', JSON.stringify(newNotices));
+  };
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -109,7 +148,9 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
-      <Header />
+      <Header onAdminClick={() => setShowAdmin(true)} />
+      
+      <NoticeBanner notices={notices} />
 
       {/* Main Chat Area */}
       <main className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
@@ -171,6 +212,16 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Admin Panel Overlay */}
+      <AdminPanel 
+        isOpen={showAdmin} 
+        onClose={() => setShowAdmin(false)} 
+        currentInstruction={customInstruction}
+        onUpdateInstruction={handleUpdateInstruction}
+        notices={notices}
+        onUpdateNotices={handleUpdateNotices}
+      />
     </div>
   );
 };
