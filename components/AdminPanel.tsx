@@ -49,14 +49,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 }, [isOpen, currentInstruction]);
 
 useEffect(() => {
-  fetch("https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/notices")
-    .then(res => res.json())
-    .then(data => {
-      if (Array.isArray(data.notices)) {
-        onUpdateNotices(data.notices);
-      }
-    });
+  const fetchNotices = () => {
+    fetch("https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/notices")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.notices)) {
+          onUpdateNotices(data.notices);
+        }
+      });
+  };
+
+  fetchNotices(); // initial load
+
+  const interval = setInterval(fetchNotices, 3000); // every 3 seconds
+
+  return () => clearInterval(interval);
 }, []);
+
 
   const verifyPin = async (pin: string): Promise<boolean> => {
   try {
