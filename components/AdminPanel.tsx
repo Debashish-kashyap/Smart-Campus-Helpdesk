@@ -36,12 +36,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [activeTab, setActiveTab] = useState<'notices' | 'documents' | 'ai'>('notices');
   const [isProcessingFile, setIsProcessingFile] = useState(false);
 
-  // Reset local state when opened
+
   useEffect(() => {
     if (isOpen) {
       setInstructionText(currentInstruction);
     }
   }, [isOpen, currentInstruction]);
+ useEffect(() => {
+  if (isOpen) {
+    setInstructionText(currentInstruction);
+  }
+}, [isOpen, currentInstruction]);
+
+useEffect(() => {
+  fetch("https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/notices")
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data.notices)) {
+        onUpdateNotices(data.notices);
+      }
+    });
+}, []);
 
   const verifyPin = async (pin: string): Promise<boolean> => {
   try {
@@ -83,18 +98,37 @@ if (!isOpen) return null;
 
 
 
-  // --- Notices ---
-  const handleAddNotice = () => {
-    if (newNotice.trim()) {
-      onUpdateNotices([...notices, newNotice.trim()]);
-      setNewNotice('');
-    }
-  };
+  // --- Notices (BACKEND CONNECTED) ---
 
-  const handleRemoveNotice = (index: number) => {
-    const updated = notices.filter((_, i) => i !== index);
-    onUpdateNotices(updated);
-  };
+const handleAddNotice = async () => {
+  if (!newNotice.trim()) return;
+
+  const res = await fetch(
+    "https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/notices",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notice: newNotice.trim() }),
+    }
+  );
+
+  const data = await res.json();
+  onUpdateNotices(data.notices);
+  setNewNotice("");
+};
+
+const handleRemoveNotice = async (index: number) => {
+  const res = await fetch(
+    `https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/notices/${index}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  const data = await res.json();
+  onUpdateNotices(data.notices);
+};
+
 
   // --- Documents ---
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
