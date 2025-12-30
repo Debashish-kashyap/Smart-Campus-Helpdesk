@@ -391,8 +391,11 @@ const handleRemoveNotice = async (index: number) => {
                               </div>
                               <div className="flex flex-col min-w-0">
                                 <span className="text-sm font-medium text-slate-700 truncate">{doc.name}</span>
-                                <span className="text-[10px] text-slate-400">{doc.uploadDate} • {doc.content.length.toLocaleString()} chars</span>
-                                {doc.url && (
+                            <span className="text-[10px] text-slate-400">
+                               PDF Document
+                                   </span>
+
+                               {doc.url && (
                                     <a
                                      href={doc.url}
                                      target="_blank"
