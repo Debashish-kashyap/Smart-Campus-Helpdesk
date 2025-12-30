@@ -36,6 +36,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [activeTab, setActiveTab] = useState<'notices' | 'documents' | 'ai'>('notices');
   const [isProcessingFile, setIsProcessingFile] = useState(false);
 
+// --- Documents (BACKEND SYNC) ---
+const [documentsList, setDocumentsList] = useState<any[]>([]);
+
+const fetchDocuments = () => {
+  fetch("https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/documents")
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data.documents)) {
+        setDocumentsList(data.documents);
+      }
+    })
+    .catch(console.error);
+};
+
+useEffect(() => {
+  fetchDocuments();
+  const interval = setInterval(fetchDocuments, 4000);
+  return () => clearInterval(interval);
+}, []);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -177,7 +197,26 @@ const handleRemoveNotice = async (index: number) => {
     event.target.value = "";
   }
 };
+  const handleRemoveDocument = async (docId: string) => {
+  try {
+    const res = await fetch(
+      `https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/documents/${docId}`,
+      {
+        method: "DELETE",
+      }
+    );
 
+    if (!res.ok) {
+      throw new Error("Failed to delete document");
+    }
+
+    // 🔄 refresh document list after delete
+    fetchDocuments();
+  } catch (error) {
+    console.error("Delete error:", error);
+    alert("Failed to delete document");
+  }
+};
 
   // --- AI Config ---
   const handleSaveInstruction = () => {
@@ -340,12 +379,15 @@ const handleRemoveNotice = async (index: number) => {
                     </div>
 
                     <div className="space-y-2">
-                      <h4 className="text-xs font-semibold text-slate-500 uppercase">Indexed Documents ({documents.length})</h4>
-                      {documents.length === 0 ? (
+                      <h4 className="text-xs font-semibold text-slate-500 uppercase">
+                              Indexed Documents ({documentsList.length})</h4>
+
+                      {documentsList.length === 0 ? (
                         <p className="text-slate-400 text-sm italic">No documents indexed yet.</p>
                       ) : (
-                        documents.map((doc) => (
-                          <div key={doc.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                        documentsList.map((doc, idx) => (
+
+                          <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
                             <div className="flex items-center gap-3 overflow-hidden">
                               <div className={`p-2 rounded-lg ${doc.type === 'pdf' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
                                 {doc.type === 'pdf' ? (
@@ -363,7 +405,9 @@ const handleRemoveNotice = async (index: number) => {
                                 <span className="text-[10px] text-slate-400">{doc.uploadDate} • {doc.content.length.toLocaleString()} chars</span>
                               </div>
                             </div>
-                            <button onClick={() => handleRemoveDocument(doc.id)} className="p-2 text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors">
+                            <button
+                             onClick={() => handleRemoveDocument(doc.id)}
+                                      className="p-2 text-slate-400 hover:text-red-500">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                                 <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149-.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clipRule="evenodd" />
                               </svg>
@@ -408,6 +452,4 @@ const handleRemoveNotice = async (index: number) => {
 
 export default AdminPanel;
 
-function fetchDocuments() {
-throw new Error('Function not implemented.');
-}
+
