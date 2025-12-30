@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as pdfjsLib from 'pdfjs-dist';
 import { CampusDocument } from '../types';
-
-// Set up worker for PDF.js
-// Ensure GlobalWorkerOptions exists before setting (handles different import structures)
-if (pdfjsLib.GlobalWorkerOptions) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://esm.sh/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
-}
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -160,9 +153,7 @@ const handleRemoveNotice = async (index: number) => {
 
 
   // --- Documents ---
-  const handleFileUpload = async (
-  event: React.ChangeEvent<HTMLInputElement>
-) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -184,19 +175,17 @@ const handleRemoveNotice = async (index: number) => {
       throw new Error("Upload failed");
     }
 
-    alert(`Successfully uploaded: ${file.name}`);
-
-    // 🔄 refresh list so other devices sync
-    fetchDocuments();
-
-  } catch (error) {
-    console.error("Upload error:", error);
-    alert("Error uploading file");
+    fetchDocuments(); // 🔄 refresh list
+    alert("PDF uploaded successfully");
+  } catch (err) {
+    console.error(err);
+    alert("PDF upload failed");
   } finally {
     setIsProcessingFile(false);
     event.target.value = "";
   }
 };
+
   const handleRemoveDocument = async (docId: string) => {
   try {
     const res = await fetch(
@@ -403,6 +392,17 @@ const handleRemoveNotice = async (index: number) => {
                               <div className="flex flex-col min-w-0">
                                 <span className="text-sm font-medium text-slate-700 truncate">{doc.name}</span>
                                 <span className="text-[10px] text-slate-400">{doc.uploadDate} • {doc.content.length.toLocaleString()} chars</span>
+                                {doc.url && (
+                                    <a
+                                     href={doc.url}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="text-xs text-blue-600 underline mt-1"
+                                       >
+                                     Open PDF
+                                   </a>
+                                )}
+
                               </div>
                             </div>
                             <button
