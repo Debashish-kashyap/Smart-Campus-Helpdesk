@@ -140,66 +140,44 @@ const handleRemoveNotice = async (index: number) => {
 
 
   // --- Documents ---
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = async (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    setIsProcessingFile(true);
+  setIsProcessingFile(true);
 
-    try {
-      let content = '';
-      const fileType = file.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'text';
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-      if (fileType === 'pdf') {
-        const arrayBuffer = await file.arrayBuffer();
-        
-        // Use namespace import access
-        const loadingTask = pdfjsLib.getDocument(arrayBuffer);
-        const pdf = await loadingTask.promise;
-        
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items.map((item: any) => item.str).join(' ');
-          fullText += `[Page ${i}]\n${pageText}\n\n`;
-        }
-        content = fullText;
-      } else {
-        // Assume text/markdown
-        content = await file.text();
+    const res = await fetch(
+      "https://smart-campus-helpdesk-1038185402530.us-west1.run.app/api/upload-pdf",
+      {
+        method: "POST",
+        body: formData,
       }
+    );
 
-      if (content.trim()) {
-        const newDoc: CampusDocument = {
-          id: Date.now().toString(),
-          name: file.name,
-          content: content,
-          uploadDate: new Date().toLocaleDateString(),
-          type: fileType as 'pdf' | 'text',
-        };
-        onUpdateDocuments([...documents, newDoc]);
-        alert(`Successfully indexed: ${file.name}`);
-      } else {
-        alert('Could not extract text from the file. It might be empty or scanned (images).');
-      }
-
-    } catch (error) {
-      console.error('File upload error:', error);
-      alert('Error processing file. Please check if it is a valid PDF or text file.');
-    } finally {
-      setIsProcessingFile(false);
-      // Clear input
-      event.target.value = '';
+    if (!res.ok) {
+      throw new Error("Upload failed");
     }
-  };
 
-  const handleRemoveDocument = (id: string) => {
-    if (window.confirm('Are you sure you want to remove this document from the AI knowledge base?')) {
-      const updated = documents.filter(d => d.id !== id);
-      onUpdateDocuments(updated);
-    }
-  };
+    alert(`Successfully uploaded: ${file.name}`);
+
+    // 🔄 refresh list so other devices sync
+    fetchDocuments();
+
+  } catch (error) {
+    console.error("Upload error:", error);
+    alert("Error uploading file");
+  } finally {
+    setIsProcessingFile(false);
+    event.target.value = "";
+  }
+};
+
 
   // --- AI Config ---
   const handleSaveInstruction = () => {
@@ -429,3 +407,7 @@ const handleRemoveNotice = async (index: number) => {
 };
 
 export default AdminPanel;
+
+function fetchDocuments() {
+throw new Error('Function not implemented.');
+}
