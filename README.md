@@ -2,19 +2,98 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+Smart Campus Helpdesk (AI-Powered) – Frontend
 
-This contains everything you need to run your app locally.
+Frontend application for Smart Campus Helpdesk, an AI-assisted platform designed to centralize and simplify campus information access for students.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1GPShXzNZbwmKiG9EpLLCtW-YnTi8nZi0
+The system currently supports PDF document management and notice publishing, with AI-powered answers fetched from official university websites.
+AI-based question answering directly from uploaded PDFs is under active development.
 
-## Run Locally
+🚀 Current Features
 
-**Prerequisites:**  Node.js
+Student-facing AI chat interface for campus-related queries
 
+AI responses sourced from official university websites
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Admin panel to:
+
+Upload, store, and delete official PDFs
+
+Post and remove campus notices
+
+Manage system instructions
+
+Responsive and clean UI for desktop and mobile
+
+Serverless & cloud-native frontend architecture
+
+🧠 Current Workflow
+Student Flow
+
+Student opens Smart Campus Helpdesk
+
+Enters a campus-related question
+
+Frontend sends query to backend
+
+Backend queries Google Gemini using official website sources
+
+AI-generated response is displayed instantly
+
+Admin Flow
+
+Admin logs in using a secure PIN
+
+Uploads official PDFs (storage & management only)
+
+Posts or deletes campus notices
+
+Updates system instructions
+
+🔧 Note: AI-based question answering from uploaded PDFs is not yet enabled and is currently under development.
+
+🌱 Work in Progress
+
+AI-powered question answering from uploaded PDFs
+
+Semantic search across stored documents
+
+Improved answer traceability with source references
+
+💡 Innovation Highlight
+
+Replaces manual notice boards and repetitive admin communication
+
+Centralizes official campus information digitally
+
+Provides 24×7 AI-assisted support
+
+Reduces administrative workload
+
+Designed to scale using serverless cloud architecture
+
+🛠️ Tech Stack
+
+Frontend Framework: React + TypeScript
+
+Build Tool: Vite
+
+Styling: Responsive modern UI
+
+Hosting: Google Cloud Run
+
+AI Integration: Google Gemini API (via backend)
+
+☁️ Google Technologies Used
+
+Google Cloud Run
+📌 Use Case
+
+Built for colleges and universities aiming to modernize campus communication using AI, cloud-native systems, and official data sources.
+
+📜 License
+
+This project is developed for educational, learning, and hackathon purposes.
+Google AI Studio
+
+Google Gemini API
