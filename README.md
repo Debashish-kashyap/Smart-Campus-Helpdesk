@@ -24,7 +24,7 @@ Responsive and clean UI for desktop and mobile
 Serverless & cloud-native frontend architecture
 
 🧠 Current Workflow
-Student Flow
+   Student Flow
 
 Student opens Smart Campus Helpdesk
 
